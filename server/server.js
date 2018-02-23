@@ -295,10 +295,11 @@ app.post('/testOnline', (req, res) => {
   var url = 'http://' + ip + '/random'
 
   console.log("url: " + url);
-
+  var jsonString = '{"hola" : "hola"}';
+  var contentLength = BUffer.byteLength(jsonString, 'utf8');
   request.post({
     url,
-    form: '{"hola" : "hola"}',
+    form: jsonString,
     headers:{
       'Content-Type' : 'application/json',
       'Content-Length' : contentLength
