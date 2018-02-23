@@ -296,7 +296,7 @@ app.post('/testOnline', (req, res) => {
 
   console.log("url: " + url);
   var jsonString = '{"hola" : "hola"}';
-  var contentLength = BUffer.byteLength(jsonString, 'utf8');
+  var contentLength = Buffer.byteLength(jsonString, 'utf8');
   request.post({
     url,
     form: jsonString,
