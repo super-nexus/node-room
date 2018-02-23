@@ -290,7 +290,7 @@ app.post('/test', (req, res) => {
 
 app.post('/testOnline', (req, res) => {
 
-  var ip = req.body.ip;
+  var ip = req.connection.remoteAddress;
 
   var url = 'http://' + ip + '/random'
 
