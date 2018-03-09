@@ -16,7 +16,7 @@ var Url = 'http://192.168.1.102:80/switch';
 
 const successResponse = 'OK';
 
-var port = process.env.PORT;
+var port = process.env.PORT || 3000;
 
 var saveLights = (lightsArray, mac_address, res) => {
   console.log('savingLights');
@@ -309,6 +309,6 @@ app.post('/testOnline', (req, res) => {
 
 })
 
-app.listen(port || 3000, () => {
-  console.log('Server started at:' + (port || 3000));
+app.listen(port, () => {
+  console.log('Server started at: ' + port);
 })
