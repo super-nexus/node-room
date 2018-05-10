@@ -58,7 +58,23 @@ var nodeSchema = new mongoose.Schema({
 
 })
 
+nodeSchema.statics.findByMacAddress = function(mac_address){
+  var NodeMCU = this;
+
+  nodeMCU.findOne({mac_address: mac_address}).then((doc) => {
+    if(!doc){
+      return new Promise.reject();
+    }
+    else{
+      return doc;
+    }
+  })
+
+}
+
 
 var nodeMCU = mongoose.model('nodeMCU', nodeSchema);
+
+
 
 module.exports = {nodeMCU};

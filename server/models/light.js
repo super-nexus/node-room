@@ -2,14 +2,18 @@ const mongoose = require('mongoose');
 
 var lightSchema = new mongoose.Schema({
 
-  mac_address: {
+  id: {
+    type: Number,
+    required: true
+  },
+
+  mac_address:{
     type: String,
     required: true
   },
 
-  state:{
+  state: {
     type: Number,
-    enum: [1, 0],
     required: true
   },
 
@@ -18,16 +22,16 @@ var lightSchema = new mongoose.Schema({
     required: true
   },
 
-  id: {
-    type: Number,
-    required: true
-  },
-
   name: {
     type: String,
     required: true
-  }
+  },
 
+  favourite: {
+    type: Number,
+    default: 0,
+    enum: [1,0]
+  }
 });
 
 

@@ -36,7 +36,6 @@ var saveLights = (lightsArray, mac_address, res) => {
   }
 }
 
-
 app.use(bodyParser.json());
 
 app.post('/switch', (req, res) => {
@@ -159,7 +158,7 @@ app.post('/setupNodeMCU', (req, res) => {
         res.status(200).send(successResponse);
       }
       else if(data.ip != req.body.ip){
-        nodeMCU.findOneAndUpdate({mac_address: body.req.mac_address}, {$set: {ip: req.body.ip}}).then((data) => {
+        nodeMCU.findOneAndUpdate({mac_address: req.body.mac_address}, {$set: {ip: req.body.ip}}).then((data) => {
           if(!data){
             console.log('no data recieved');
             return res.status(400).send('no data recieved');
@@ -219,18 +218,22 @@ app.post('/switchLight', (req, res) => {
   var recievedLight = req.body;
 
   // We need: ip address, pin , state
+  // We get id and mac address of a light
 
   console.log('Light recieved' + JSON.stringify(recievedLight));
 
   nodeMCU.findOne({mac_address: recievedLight.mac_address}).then((doc) => {
 
-    if(!doc){return new Promise.reject('no document recieved');}
+    if(!doc){throw Error('No document recieved');}
     else{
 
         var index = recievedLight.id -1;
+        var ip = doc.ip;
         var wantedLightObject = doc.switches[index];
         var pin = wantedLightObject.pin;
         var state = ((wantedLightObject.state == 0)? 1 : 0);
+
+        console.log('Document recieved: ', doc);
 
         var objectToSend = {
           pin, state
@@ -239,7 +242,7 @@ app.post('/switchLight', (req, res) => {
         var jsonString = JSON.stringify(objectToSend);
         var contentLength = Buffer.byteLength(jsonString, 'utf8');
 
-        request.post({
+        /*request.post({
           url: Url,
           form: jsonString,
           headers: {
@@ -261,6 +264,22 @@ app.post('/switchLight', (req, res) => {
 
           }
 
+        })*/
+
+        exec.sendPostRequest(objectToSend, ip, '/switch', (body) => {
+            if(body == 'OK'){
+            console.log('succesfuly sent switch request');
+            doc.switches[index].state = state;
+            doc.save().then((newLight) => {
+
+              console.log('Light siwtched: ', newLight);
+              res.status(200).send('OK');
+
+            }).catch((err) => {
+              console.log(err);
+              res.status(400).send(err);
+            });
+          }
         })
 
 
@@ -269,6 +288,76 @@ app.post('/switchLight', (req, res) => {
 
   }).catch((err) => {
     console.log(err);
+    res.status(400).send(err);
+  })
+
+
+})
+
+app.post('/controlPWM', (req, res) => {
+
+ //We need pin plus pwm value, we recieve mac_address and id of the light
+
+  var recievedDevice = req.body;
+  var id = recievedDevice.id;
+  var mac_address = recievedDevice.mac_address;
+  var pwmValue= recievedDevice.pwm;
+  var path = '/controlPWM';
+
+  nodeMCU.findByMacAddress(mac_address).then((doc) => {
+
+    var index = id - 1;
+    var pin = doc.switches[index].pin;
+    var ip = doc.ip;
+
+
+    var objectToSend = {
+      pin,
+      pwm : pwmValue
+    }
+
+    var jsonString = JSON.stringify(objectToSend);
+    var contentLength = Buffer.byteLength(jsonString, 'utf8');
+
+    request.post({
+      url: 'http://' + ip + path,
+      form: jsonString,
+
+    })
+
+
+  })
+
+});
+
+app.post('/switchLightFavourite', (req, res) => {
+
+  var object = res.body;
+  var mac_address = object.mac_address;
+  var id = object.id;
+  var favourite = object.favourite;
+
+  Light.findOne({
+    mac_address,
+    id
+  }).then((doc) => {
+
+    if(!doc){
+      res.status(400).send('Could not find any light');
+      return;
+    }
+    else{
+      doc.favourite = favourite;
+      var light = new Light(doc);
+
+      light.save().then((doc) => {
+        if(!doc){
+          res.status(400).send("Something went wrong with saving the light, empty doc recieved");
+        }
+        console.log('Saved light ', doc);
+        res.status(200).send("OK");
+      })
+    }
   })
 
 
