@@ -88,10 +88,12 @@ app.post('/setupApp', (req, res) => {
 
   console.log('Setting up app');
 
+  //this returns the array of stored lights
+
   Light.find({}).then((doc) => {
 
     if(!doc){
-      return new Promsie.reject("document returned is empty");
+      throw Error("No lights found");
     }
     else{
 
@@ -114,7 +116,7 @@ app.post('/setupApp', (req, res) => {
 });
 
 app.post('/setupApp2', (req, res) => {
-
+  //This returns nodeMCU units
   nodeMCU.find({}).then((doc) => {
 
     if(!doc){return new Promise.reject("!doc");}
