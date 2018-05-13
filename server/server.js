@@ -18,12 +18,13 @@ const successResponse = 'OK';
 
 var port = process.env.PORT || 3000;
 
-var saveLights = (lightsArray, mac_address, res) => {
+var saveLights = (lightsArray, mac_address, area, res) => {
   console.log('savingLights');
   for(var i = 0; i < lightsArray.length; i++){
 
     var currentLight = lightsArray[i];
     currentLight.mac_address = mac_address;
+    currentLight.area = area;
 
     var light = new Light(currentLight);
 
@@ -142,19 +143,20 @@ app.post('/setupNodeMCU', (req, res) => {
 
     var lightsArray = req.body.switches;
     var mac_address = req.body.mac_address;
+    var area = req.body.area;
     console.log('Lights array', lightsArray);
 
     nodeMCU.findOne({mac_address: req.body.mac_address}).then((data) => {
       if(!data){
         console.log('No node mcu with this mac address found: ', req.body.mac_address);
         nodemcu.save().then(() => {
-          saveLights(lightsArray, mac_address, res);
+          saveLights(lightsArray, mac_address, area, res);
           res.status(200).send(successResponse);
         })
         return;
       }
       if(req.body.changeInLights){
-        saveLights(lightsArray, mac_address, res);
+        saveLights(lightsArray, mac_address, area, res);
       }
       if (data.ip == req.body.ip) {
         res.status(200).send(successResponse);

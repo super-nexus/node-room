@@ -27,6 +27,11 @@ var lightSchema = new mongoose.Schema({
     required: true
   },
 
+  area: {
+    type : String,
+    default: "undefined"
+  },
+
   favourite: {
     type: Number,
     default: 0,
