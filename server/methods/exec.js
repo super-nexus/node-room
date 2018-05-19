@@ -28,6 +28,7 @@ var sendPostRequest = (jsonObject, ip, path, done) => {
   request.post({
     url,
     form: jsonString,
+    timeout: 1000,
     headers: {
       'Content-Type' : 'application/json',
       'Content-Length' : contentLength
