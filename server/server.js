@@ -1,15 +1,23 @@
 const express = require('express');
 const request = require('request');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const hbs = require('hbs');
 const _ = require('lodash');
 
 var {mongoose} = require('./db/mongoose');
 var {nodeMCU} = require('./models/nodeMCU');
 var {Light} = require('./models/light');
+
 var exec = require('./methods/exec');
 var application = require('./methods/application');
 
 var app = express();
+
+app.set('view engine', 'hbs');
+hbs.registerPartials(__dirname + "/../views/partials");
+
+app.use(express.static(__dirname + '/public'))
 
 var testUrl = 'https://requestb.in/17pzkl51';
 var Url = 'http://192.168.1.102:80/switch';
@@ -368,7 +376,45 @@ app.post('/switchLightFavourite', (req, res) => {
 })
 
 app.get('/home', (req, res) => {
-  res.send("Hello world");
+
+  res.render('index.hbs', {
+    pageTitle: "index page"
+  })
+
+})
+
+app.get('/setup', (req, res) => {
+  res.render('index.hbs', {
+    pageTitle: 'Index'
+  })
+})
+
+app.post('/setupPage', (req, res) => {
+
+  var stringToReturn = '';
+
+  nodeMCU.find({}).then((doc) => {
+
+    console.log('Recieved this doc from /setup: ' + doc);
+
+    stringToReturn+= '<ol>'
+
+    for(var i = 0; i < doc.length; i++){
+
+      stringToReturn+= '<li class="node">' + doc[i].name + '</li>'
+
+    }
+
+    stringToReturn+= '</ol>'
+
+    console.log('String to return: ' + stringToReturn);
+
+    res.send(stringToReturn);
+
+  }).catch((err) => {
+    console.log('Error @GET /setup: ' + err);
+  })
+
 })
 
 app.post('/test', (req, res) => {

@@ -36,6 +36,12 @@ var lightSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     enum: [1,0]
+  },
+
+  pwm: {
+    type: Number,
+    default: 0,
+    enum: [1,0]
   }
 });
 
