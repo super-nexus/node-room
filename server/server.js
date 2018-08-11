@@ -391,28 +391,50 @@ app.get('/setup', (req, res) => {
 
 app.post('/setupPage', (req, res) => {
 
-  var stringToReturn = '';
+  var objectArray = [];
 
   nodeMCU.find({}).then((doc) => {
 
     console.log('Recieved this doc from /setup: ' + doc);
 
-    stringToReturn+= '<ol>'
-
     for(var i = 0; i < doc.length; i++){
 
-      stringToReturn+= '<li class="node">' + doc[i].name + '</li>'
+      var objectToInsert = {
+        name: doc[i].name,
+        mac_address: doc[i].mac_address
+      }
+
+      objectArray.push(objectToInsert);
 
     }
 
-    stringToReturn+= '</ol>'
+    console.log('Name array: ' + objectArray);
 
-    console.log('String to return: ' + stringToReturn);
-
-    res.send(stringToReturn);
+    res.send(objectArray);
 
   }).catch((err) => {
-    console.log('Error @GET /setup: ' + err);
+    console.log('Error @POST /setup: ' + err);
+  })
+
+})
+
+app.post('/getNodeSetup', (req, res) => {
+
+  var mac_address = req.body.mac_address;
+
+  nodeMCU.findOne({mac_address: mac_address}).then((node) => {
+
+    if(!node){throw Error('No nodeMCU found');}
+
+
+
+    res.render('node.hbs', {
+      
+    });
+
+
+  }).catch((err) => {
+    console.log('Error @POST /getNodeSetup: ' + err);
   })
 
 })
